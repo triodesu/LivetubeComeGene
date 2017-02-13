@@ -155,7 +155,7 @@ public class Main implements ActionListener {
 						System.out.println("group2:" + m.group(2));
 						System.out.println("group3:" + m.group(3));
 					}else{
-						System.out.println("まっちできてない");
+						System.out.println("まっちできてない→" + URLDecoder.decode(s.toString()));
 					}
 					comNo++;
 				}
