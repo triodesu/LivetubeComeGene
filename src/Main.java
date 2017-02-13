@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -66,10 +69,10 @@ public class Main implements ActionListener {
 				haishinID = getId(url);
 
 				//最新コメント番号を取得ににいき、新しいコメントがあれば、コメントをながす
-				if(latestCom != getlatestCom()){
-					insComment();
-				}
-
+				    latestCom = getlatestCom();
+				    System.out.println(latestCom);
+//					insComment();
+				    test();
 
 			}catch(Exception e){
 
@@ -79,6 +82,33 @@ public class Main implements ActionListener {
 
 		}
 	}
+
+	public void test() throws IOException{
+
+			//コメント取得用URL生成
+			String urlStr = "http://livetube.cc/stream/" + haishinID + ".comments." + String.valueOf(latestCom);
+			System.out.println(2);
+			URL url = new URL(urlStr);
+			System.out.println(3);
+			InputStream in = url.openStream();
+			System.out.println(4);
+			StringBuilder sb = new StringBuilder();
+			System.out.println(5);
+			try {
+				BufferedReader bf = new BufferedReader(new InputStreamReader(in));
+				System.out.println(6);
+				String s;
+				while ((s=bf.readLine())!=null) {
+					sb.append(s);
+				}
+
+				System.out.println("結果　"+URLDecoder.decode(sb.toString()));
+
+			} finally {
+				in.close();
+			}
+	}
+
 	//★★★★★動画ID取得メソッド
 	public String getId(URL url) throws IOException {
 		InputStream in = url.openStream();
@@ -89,7 +119,6 @@ public class Main implements ActionListener {
 			while ((s=bf.readLine())!=null) {
 				sb.append(s);
 			}
-
 			haishinID = sb.substring(sb.indexOf("var comment_entry_id =") + 24, sb.indexOf("var comment_entry_id =") + 37);
 			System.out.println(haishinID);
 
@@ -101,23 +130,39 @@ public class Main implements ActionListener {
 	public int getlatestCom() throws IOException{
 
 		//最新コメント番号を取得しにいく
-		int comNo = latestCom;
+		int comNo = 0;
 
-		//コメント取得用URL生成
-		String urlStr = "http://livetube.cc/stream/" + haishinID + ".comments." + String.valueOf(comNo);
-		URL url = new URL(urlStr);
-		InputStream in = url.openStream();
+			//コメント取得用URL生成
+			String urlStr = "http://livetube.cc/stream/" + haishinID + ".comments";
+			URL url = new URL(urlStr);
+			InputStream in = url.openStream();
+			StringBuilder sb = new StringBuilder();
+			try {
+				BufferedReader bf = new BufferedReader(new InputStreamReader(in));
 
-		try {
-			BufferedReader bf = new BufferedReader(new InputStreamReader(in));
-			String s;
-			while ((s=bf.readLine())!=null) {
-				comNo++;
+				String s;
+
+				String joken = "^([0-9]+)\\s:\\s\\s+([0-9]+\\/[0-9]+\\s[0-9]+\\:[0-9]+)\\s(\\S+)$";
+//				String joken = "^([0-9]+)\\s:\\s(\\S+)\\s+([0-9]+\\/[0-9]+\\s[0-9]+\\:[0-9]+)\\s(\\S+)$";
+				Pattern p = Pattern.compile(joken);
+				Matcher m;
+				while ((s=bf.readLine())!=null) {
+					sb.append(s);
+					sb.append("\n");
+					m = p.matcher(URLDecoder.decode(s.toString()));
+					if(m.find()){
+						System.out.println("group1:" + m.group(1));
+						System.out.println("group2:" + m.group(2));
+						System.out.println("group3:" + m.group(3));
+					}else{
+						System.out.println("まっちできてない");
+					}
+					comNo++;
+				}
+//				System.out.println(URLDecoder.decode(sb.toString()));
+			} finally {
+				in.close();
 			}
-		} finally {
-			in.close();
-		}
-
 		return comNo;
 	}
 
@@ -134,21 +179,18 @@ public class Main implements ActionListener {
 				commentList.add(s);
 			}
 
-
 			comFrame.setSize(700,300);
 			comFrame.setLayout(null);
 			comFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			JLabel comLabel;
 			int comIchi = 0;
-			for(int i = commentList.size() - COMENTREC; i < commentList.size() ; i++){
-				comLabel = new JLabel((String)commentList.get(i));
+			for(int i = commentList.size() - COMENTREC - 1; i < commentList.size() ; i++){
+				comLabel = new JLabel(URLDecoder.decode((String)commentList.get(i)));
 				comLabel.setBounds(0, 0, 700, comIchi);
-				comIchi = comIchi + 10;
+				comIchi = comIchi + 30;
 				comFrame.add(comLabel);
 			}
-
-			comFrame.add(label);
 
 			comFrame.setVisible(true);
 
