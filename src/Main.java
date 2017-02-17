@@ -5,17 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-public class Main implements ActionListener {
+public class Main implements ActionListener, Runnable{
 
 	final int COMENTREC = 5;
 	JTextField livetubeUrlFld = new JTextField();
@@ -26,10 +25,14 @@ public class Main implements ActionListener {
 	String haishinID;
 	//最新コメント番号保持用
 	int latestCom = 0;
+	//最新コメント番号バッファ用
+	int latestComBack = 0;
 	//コメント保持用
 	ArrayList commentList = new ArrayList();
 	//コメント用フレーム
 	JFrame comFrame = new JFrame("コメントフレーム");
+	//描画用フレーム
+	DrawFrame drawFrame;
 
 	public void newFrame(){
 		JFrame frame = new JFrame("らいぶちゅーぶコメントじぇねれーた");
@@ -64,18 +67,24 @@ public class Main implements ActionListener {
 		if(arg0.getActionCommand().equals("開始")){
 			//URLを読み込みID取得
 			try{
+				drawFrame = new DrawFrame();
 				URL url = new URL(livetubeUrlFld.getText());
 				//テキストフィールドに入力されたURLからIDを取得しにいく
 				haishinID = getId(url);
 
-				//最新コメント番号を取得ににいき、新しいコメントがあれば、コメントをながす
-				    latestCom = getlatestCom();
-				    System.out.println(latestCom);
+				latestCom = getlatestCom();
+
+				Thread thread = new Thread(this);
+				thread.start();
+
+				Thread thread2 = new Thread(drawFrame);
+				thread2.start();
+
 //					insComment();
-				    test();
+//				    test();
 
 			}catch(Exception e){
-
+				e.printStackTrace();
 			}
 
 		}else if(arg0.getActionCommand().equals("終了")){
@@ -83,30 +92,24 @@ public class Main implements ActionListener {
 		}
 	}
 
-	public void test() throws IOException{
+	public void run() {
+		try{
+		while(true){
+			latestCom = getlatestCom();
+			drawFrame.commentList = this.commentList;
 
-			//コメント取得用URL生成
-			String urlStr = "http://livetube.cc/stream/" + haishinID + ".comments." + String.valueOf(latestCom);
-			System.out.println(2);
-			URL url = new URL(urlStr);
-			System.out.println(3);
-			InputStream in = url.openStream();
-			System.out.println(4);
-			StringBuilder sb = new StringBuilder();
-			System.out.println(5);
-			try {
-				BufferedReader bf = new BufferedReader(new InputStreamReader(in));
-				System.out.println(6);
-				String s;
-				while ((s=bf.readLine())!=null) {
-					sb.append(s);
-				}
+//		    if(latestCom != latestCom){
 
-				System.out.println("結果　"+URLDecoder.decode(sb.toString()));
+//		    }
+		    latestComBack = latestCom;
+		}
 
-			} finally {
-				in.close();
-			}
+		}catch(Exception e){
+			e.getStackTrace();
+		}
+	}
+	public void testDraw() throws IOException{
+
 	}
 
 	//★★★★★動画ID取得メソッド
@@ -121,7 +124,8 @@ public class Main implements ActionListener {
 			}
 			haishinID = sb.substring(sb.indexOf("var comment_entry_id =") + 24, sb.indexOf("var comment_entry_id =") + 37);
 			System.out.println(haishinID);
-
+		}catch(Exception e){
+			e.printStackTrace();
 		} finally {
 			in.close();
 		}
@@ -129,41 +133,42 @@ public class Main implements ActionListener {
 	}
 	public int getlatestCom() throws IOException{
 
-		//最新コメント番号を取得しにいく
-		int comNo = 0;
-
 			//コメント取得用URL生成
-			String urlStr = "http://livetube.cc/stream/" + haishinID + ".comments";
-			URL url = new URL(urlStr);
-			InputStream in = url.openStream();
+			URL url;
+			if(latestCom == 0){
+				//初回ロードの場合
+				url = new URL("http://livetube.cc/stream/" + haishinID +".comments");
+			}else{
+				//二回目以降のロードの場合
+				url = new URL("http://livetube.cc/stream/" + haishinID +".comments." + latestCom);
+			}
+
+			URLConnection urlcon = url.openConnection();
+			urlcon.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.63 Safari/537.36");
+
+			InputStream in = urlcon.getInputStream();
 			StringBuilder sb = new StringBuilder();
+
 			try {
 				BufferedReader bf = new BufferedReader(new InputStreamReader(in));
 
 				String s;
 
-				String joken = "^([0-9]+)\\s:\\s\\s+([0-9]+\\/[0-9]+\\s[0-9]+\\:[0-9]+)\\s(\\S+)$";
-//				String joken = "^([0-9]+)\\s:\\s(\\S+)\\s+([0-9]+\\/[0-9]+\\s[0-9]+\\:[0-9]+)\\s(\\S+)$";
-				Pattern p = Pattern.compile(joken);
-				Matcher m;
 				while ((s=bf.readLine())!=null) {
 					sb.append(s);
 					sb.append("\n");
-					m = p.matcher(URLDecoder.decode(s.toString()));
-					if(m.find()){
-						System.out.println("group1:" + m.group(1));
-						System.out.println("group2:" + m.group(2));
-						System.out.println("group3:" + m.group(3));
-					}else{
-						System.out.println("まっちできてない→" + URLDecoder.decode(s.toString()));
-					}
-					comNo++;
 				}
-//				System.out.println(URLDecoder.decode(sb.toString()));
-			} finally {
+//				System.out.println(sb.toString());
+				Comment commentClass = new Comment();
+				commentClass.addComment(commentList, sb.toString());
+
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			finally {
 				in.close();
 			}
-		return comNo;
+		return commentList.size();
 	}
 
 	public void insComment() throws IOException{
@@ -198,5 +203,6 @@ public class Main implements ActionListener {
 			in.close();
 		}
 	}
+
 
 }
