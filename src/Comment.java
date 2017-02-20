@@ -26,6 +26,7 @@ public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
 		String[] cutComment = cutHtml[i].split("\n");
 
 		//■■■■■■コメント画像URL抽出■■■■■■
+		comImg = null;
 		if(cutComment[1] != null && !cutComment[1].equals("")){
 			//画像がある場合URL抽出
 			int index = indexOfKetsu(cutComment[1],"\"");
@@ -33,13 +34,8 @@ public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
 
 			//画像読み込み
 			try{
-				URL url = new URL(imgUrl);  // URL は適当です
-//			    Image image = Toolkit.getDefaultToolkit().getImage(url);
-				Image image  = ImageIO.read(url);
-//			    comImg = new BufferedImage(image.getWidth(null),image.getHeight(null),BufferedImage.TYPE_INT_RGB);
-//			    comImg = new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB);
-//			    comImg.getGraphics().drawImage(image,0,0,null);
-			    setComImg(image);
+				URL url = new URL(imgUrl);
+				comImg  = ImageIO.read(url);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -88,6 +84,7 @@ public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
 		comment.setName(name);
 		comment.setComStr(comStr);
 		comment.setImgUrl(imgUrl);
+		comment.setComImg(comImg);
 		comment.setMidorikoteFlg(midorikoteFlg);
 
 		comList.add(comment);

@@ -36,7 +36,6 @@ public class Main implements ActionListener, Runnable{
 
 
 	JButton startBtn = new JButton("開始");
-	JButton entBtn = new JButton("終了");
 	JLabel  label = new JLabel("URL");
 	JLabel  label2 = new JLabel("背景色（RGB）");
 	JLabel  label3 = new JLabel("文字色（RGB）");
@@ -50,13 +49,11 @@ public class Main implements ActionListener, Runnable{
 	int latestComBack = 0;
 	//コメント保持用
 	ArrayList commentList = new ArrayList();
-	//コメント用フレーム
-	JFrame comFrame = new JFrame("コメントフレーム");
 	//描画用フレーム
 	DrawFrame drawFrame;
 
 	public void newFrame(){
-		frame = new JFrame("らいぶちゅーぶコメントじぇねれーた");
+		frame = new JFrame("");
 		frame.setSize(700,300);
 		frame.setLayout(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,16 +80,14 @@ public class Main implements ActionListener, Runnable{
 		fontBFld.setText("0");
 
 		//フォントサイズ
-		fontSizeFld.setText("12");
+		fontSizeFld.setText("24");
 		fontSizeFld.setBounds(380, 190, 30, 20);
 
 		//各種ボタン
-		startBtn.setBounds(500, 50, 100, 50);
-		entBtn.setBounds(500, 150, 100, 50);
+		startBtn.setBounds(500, 100, 100, 50);
 
 		//各種ボタンにリスナーセット
 		startBtn.addActionListener(this);
-		entBtn.addActionListener(this);
 
 		//各種ラベル
 		label.setBounds(50, 50, 400, 50);
@@ -115,7 +110,6 @@ public class Main implements ActionListener, Runnable{
 		frame.add(fontSizeFld);
 
 		frame.add(startBtn);
-		frame.add(entBtn);
 		frame.add(label);
 		frame.add(label2);
 		frame.add(label3);
@@ -151,6 +145,8 @@ public class Main implements ActionListener, Runnable{
 				haishinID = getId(url);
 
 				latestCom = getlatestCom();
+
+				drawFrame.setKoshin(true);
 
 				drawFrame.setCommentList(commentList);
 
@@ -255,6 +251,8 @@ public class Main implements ActionListener, Runnable{
 			finally {
 				in.close();
 			}
+			drawFrame.setKoshin(true);
+
 		return commentList.size();
 	}
 
