@@ -1,4 +1,8 @@
+import java.awt.Image;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 
 public class Comment {
@@ -7,10 +11,11 @@ public class Comment {
  public String name;//OK
  public String comStr;//OK
  public String imgUrl;//OK
-public boolean midorikoteFlg;//OK
+ public Image comImg;
+ public boolean midorikoteFlg;//OK
 
 
-public ArrayList addComment(ArrayList comList, String htmlStr){
+public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
 	//渡されたHTMLをコメントごとにカット(50コメントあるなら要素数51のができる)
 	String[] cutHtml = htmlStr.split("<div style=\"margin-top: 5px;\">");
 
@@ -24,7 +29,21 @@ public ArrayList addComment(ArrayList comList, String htmlStr){
 		if(cutComment[1] != null && !cutComment[1].equals("")){
 			//画像がある場合URL抽出
 			int index = indexOfKetsu(cutComment[1],"\"");
-			imgUrl = "http://livetube.cc/" + cutComment[1].substring(index,cutComment[1].indexOf("\"",index));
+			imgUrl = "http://livetube.cc" + cutComment[1].substring(index,cutComment[1].indexOf("\"",index));
+
+			//画像読み込み
+			try{
+				URL url = new URL(imgUrl);  // URL は適当です
+//			    Image image = Toolkit.getDefaultToolkit().getImage(url);
+				Image image  = ImageIO.read(url);
+//			    comImg = new BufferedImage(image.getWidth(null),image.getHeight(null),BufferedImage.TYPE_INT_RGB);
+//			    comImg = new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB);
+//			    comImg.getGraphics().drawImage(image,0,0,null);
+			    setComImg(image);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+
 		}
 
 		//■■■■■■コメント番号抽出■■■■■■
@@ -42,23 +61,23 @@ public ArrayList addComment(ArrayList comList, String htmlStr){
 			//緑コテの場合
 			int index = indexOfKetsu(cutComment[2],("<span style=\"font-size:1em;color:green; font-weight:bolder;\">"));
 			name = cutComment[2].substring(index, cutComment[2].indexOf("</span></a>"));
-			System.out.println("緑コテ名前" + name);
+//			System.out.println("緑コテ名前" + name);
 		}else{
 			//緑コテ以外
 			name = cutComment[2].substring(indexOfKetsu(cutComment[2],":"),cutComment[2].indexOf("<span style=\"\">"));
-			System.out.println("緑コテ外の名前" + name);
+//			System.out.println("緑コテ外の名前" + name);
 		}
 
 		//■■■■■■日時の抽出■■■■■■
 		//緑コテ以外
 		int index = indexOfKetsu(cutComment[2],"<span style=\"\">");
 		nichiJi = cutComment[2].substring(index,cutComment[2].indexOf("</span>",index));
-		System.out.println("日時" + nichiJi);
+//		System.out.println("日時" + nichiJi);
 
 		//■■■■■■コメントの抽出■■■■■■
 		index = indexOfKetsu(cutComment[3],"<span style=\"font-weight:bold;margin-bottom:0px; padding-bottom:0px;\">");
 		comStr = cutComment[3].substring(index,cutComment[3].indexOf("</span>",index));
-		System.out.println("コメント" + comStr);
+//		System.out.println("コメント" + comStr);
 
 
 		//セット用コメントクラス
@@ -119,6 +138,14 @@ public String getImgUrl() {
 }
 public void setImgUrl(String imgUrl) {
 	this.imgUrl = imgUrl;
+}
+
+public Image getComImg() {
+	return comImg;
+}
+
+public void setComImg(Image comImg) {
+	this.comImg = comImg;
 }
 
 
