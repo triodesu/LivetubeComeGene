@@ -14,8 +14,24 @@ public class Comment {
  public Image comImg;
  public boolean midorikoteFlg;//OK
 
+//	boolean flg = true;
+
 
 public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
+/*	if(flg){
+        JEditorPane editorpane = new JEditorPane( "text/html", htmlStr );
+
+        JFrame f = new JFrame();
+        f.getContentPane().add( BorderLayout.CENTER, editorpane );
+
+        f.setTitle( "HTMLをSwingで表示してみる" );
+        f.setSize( 640, 480 );
+
+        // pack();
+        f.setVisible( true );
+		flg = false;
+	}*/
+
 	//渡されたHTMLをコメントごとにカット(50コメントあるなら要素数51のができる)
 	String[] cutHtml = htmlStr.split("<div style=\"margin-top: 5px;\">");
 

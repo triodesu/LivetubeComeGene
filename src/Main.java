@@ -156,6 +156,7 @@ public class Main implements ActionListener, Runnable{
 				Thread thread2 = new Thread(drawFrame);
 				thread2.start();
 
+				frame.dispose();
 
 			}catch(Exception e){
 				e.printStackTrace();
@@ -200,7 +201,7 @@ public class Main implements ActionListener, Runnable{
 		InputStream in = url.openStream();
 		StringBuilder sb = new StringBuilder();
 		try {
-			BufferedReader bf = new BufferedReader(new InputStreamReader(in));
+			BufferedReader bf = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 			String s;
 			while ((s=bf.readLine())!=null) {
 				sb.append(s);
@@ -233,7 +234,7 @@ public class Main implements ActionListener, Runnable{
 			StringBuilder sb = new StringBuilder();
 
 			try {
-				BufferedReader bf = new BufferedReader(new InputStreamReader(in));
+				BufferedReader bf = new BufferedReader(new InputStreamReader(in, "UTF-8"));
 
 				String s;
 
