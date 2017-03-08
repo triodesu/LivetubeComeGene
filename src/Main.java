@@ -66,21 +66,27 @@ public class Main implements ActionListener, Runnable{
 		bgGFld.setBounds(80, 190, 30, 20);
 		bgBFld.setBounds(110, 190, 30, 20);
 
-		bgRFld.setText("255");
-		bgGFld.setText("255");
-		bgBFld.setText("255");
+//		bgRFld.setText("255");
+//		bgGFld.setText("255");
+//		bgBFld.setText("255");
+		bgRFld.setText("0");
+		bgGFld.setText("0");
+		bgBFld.setText("0");
 
 		//フォント色RGBA
 		fontRFld.setBounds(230, 190, 30, 20);
 		fontGFld.setBounds(260, 190, 30, 20);
 		fontBFld.setBounds(290, 190, 30, 20);
 
-		fontRFld.setText("0");
-		fontGFld.setText("0");
-		fontBFld.setText("0");
+//		fontRFld.setText("0");
+//		fontGFld.setText("0");
+//		fontBFld.setText("0");
+		fontRFld.setText("255");
+		fontGFld.setText("255");
+		fontBFld.setText("255");
 
 		//フォントサイズ
-		fontSizeFld.setText("24");
+		fontSizeFld.setText("32");
 		fontSizeFld.setBounds(380, 190, 30, 20);
 
 		//各種ボタン
@@ -129,6 +135,11 @@ public class Main implements ActionListener, Runnable{
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getActionCommand().equals("開始")){
 			try{
+				//コメントをよみ子起動確認
+				BouyomiChan4J bouyomi = new BouyomiChan4J();
+				if(!bouyomi.talk("棒読みちゃんと接続しました。")){
+					return;
+				}
 
 				//URLを読み込み
 				URL url = new URL(livetubeUrlFld.getText());
@@ -180,16 +191,18 @@ public class Main implements ActionListener, Runnable{
 
 	public void run() {
 		try{
-		while(true){
-			latestCom = getlatestCom();
-
-			drawFrame.setCommentList(commentList);
-
-//		    if(latestCom != latestCom){
-
-//		    }
-		    latestComBack = latestCom;
-		}
+			while(true){
+				latestComBack =  commentList.size();
+				latestCom = getlatestCom();
+			    if(latestCom != latestComBack){
+					drawFrame.setKoshin(true);
+					drawFrame.setCommentList(commentList);
+					Comment com = (Comment)commentList.get(commentList.size()-1);
+					//コメントをよみ子へ送信
+					BouyomiChan4J bouyomi = new BouyomiChan4J();
+					bouyomi.talk("レス" + commentList.size()+ " " + com.getName() + " " + com.getComStr());
+			    }
+			}
 
 		}catch(Exception e){
 			e.getStackTrace();
@@ -231,6 +244,7 @@ public class Main implements ActionListener, Runnable{
 			urlcon.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.63 Safari/537.36");
 
 			InputStream in = urlcon.getInputStream();
+			System.out.println("はいったわよ");
 			StringBuilder sb = new StringBuilder();
 
 			try {
@@ -252,7 +266,8 @@ public class Main implements ActionListener, Runnable{
 			finally {
 				in.close();
 			}
-			drawFrame.setKoshin(true);
+			//正常に動く
+//			drawFrame.setKoshin(true);
 
 		return commentList.size();
 	}

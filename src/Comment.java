@@ -105,9 +105,15 @@ public ArrayList addComment(ArrayList comList, String htmlStr) throws Exception{
 
 		comList.add(comment);
 
-
-
 	}
+
+/*
+	Comment com = (Comment)comList.get(comList.size()-1);
+	//コメントをよみ子へ送信
+	BouyomiChan4J bouyomi = new BouyomiChan4J();
+	bouyomi.talk("レス" + comList.size()+ " " + com.getName() + " " + com.getComStr());
+*/
+
 	return comList;
 }
 
